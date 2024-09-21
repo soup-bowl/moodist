@@ -1,4 +1,4 @@
-import { useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { BiSolidHeart } from 'react-icons/bi/index';
 import { Howler } from 'howler';
@@ -18,6 +18,9 @@ import { FADE_OUT } from '@/constants/events';
 
 import type { Sound } from '@/data/types';
 import { subscribe } from '@/lib/event';
+import { Modal } from '../modal';
+
+import styles from './app.module.css';
 
 export function App() {
   const categories = useMemo(() => sounds.categories, []);
@@ -85,18 +88,69 @@ export function App() {
     return [...favorites, ...categories];
   }, [favoriteSounds, categories]);
 
-  return (
-    <SnackbarProvider>
-      <StoreConsumer>
-        <Container>
-          <div id="app" />
-          <Buttons />
-          <Categories categories={allCategories} />
-        </Container>
+  /**
+   * DOMAIN CHANGE MODAL
+   */
+  const [showModal, setShowModal] = useState(false);
 
-        <Toolbar />
-        <SharedModal />
-      </StoreConsumer>
-    </SnackbarProvider>
+  useEffect(() => {
+    if (!window.location.href.includes('moodist.mvze.net')) setShowModal(true);
+  }, []);
+
+  return (
+    <>
+      <SnackbarProvider>
+        <StoreConsumer>
+          <Container>
+            <div id="app" />
+            <Buttons />
+            <Categories categories={allCategories} />
+          </Container>
+
+          <Toolbar />
+          <SharedModal />
+        </StoreConsumer>
+      </SnackbarProvider>
+
+      <Modal show={showModal} onClose={() => setShowModal(false)}>
+        <div className={styles.modal}>
+          <h2>Important Update: Moodist Moving to a New Subdomain</h2>
+
+          <p>Dear users of Moodist,</p>
+          <p>
+            In an effort to reduce costs, I have decided to move Moodist from a
+            standalone domain <span>moodist.app</span> to a subdomain{' '}
+            <span>moodist.mvze.net</span>. This change should be seamless unless
+            you are using certain features that require storing data in the
+            browser. The change in the domain will result in the loss of data
+            stored in your browser&apos;s local storage. If you have stored data
+            in this version of Moodist that you wish to keep (such as notes,
+            presets, etc.), please make sure to move it to the{' '}
+            <a href="https://moodist.mvze.net" rel="noreferrer" target="_blank">
+              new version
+            </a>{' '}
+            as soon as possible. This version will be redirected to the new
+            version of Moodist on September 28th.
+          </p>
+          <p>
+            If you have any questions, requests, or problems in this regard,
+            please open an issue on{' '}
+            <a
+              href="https://github.com/remvze/moodist"
+              rel="noreferrer"
+              target="_blank"
+            >
+              GitHub
+            </a>{' '}
+            or mention me on{' '}
+            <a href="https://x.com/remvze" rel="noreferrer" target="_blank">
+              X (Twitter)
+            </a>
+            . I will be more than happy to assist you.
+          </p>
+          <p>Thank you for using Moodist!</p>
+        </div>
+      </Modal>
+    </>
   );
 }
